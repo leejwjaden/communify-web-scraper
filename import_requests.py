@@ -19,3 +19,5 @@ for location in locationCodes:
 
 for location, temps in highLowSet:
     print(f'{location}: {temps}')
+
+print("test")
