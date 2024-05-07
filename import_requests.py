@@ -1,15 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 from supabase_py import create_client, Client
+from datetime import date
 # # WeatherDetailsListItem--label--2ZacS This is labels for general data
 # # WeatherDetailsListItem--wxData--kK35q This is general data for day
 
 # Dictionary with the keys corresponding to their location codes
 locationCodes = {'Maplewood': 'USNJ0291', 'Pittsburgh': 'USPA1290', 'Manhattan': 'USNY0996', 'Boston': 'USMA0046', 'Philadelphia': 'USPA1276',
                  'San Francisco': 'USCA0987', 'Los Angeles': 'USCA0638', 'Chicago': 'USIL0225', 'Washington': 'USDC0001', 'Miami': 'USFL0316'}
-# locationCodes = ['USNJ0291', 'USPA1290', 'USNY0996', 'USMA0046', 'USPA1276', 'USCA0987', 'USCA0638', 'USIL0225', 'USDC0001', 'USFL0316']
 highLowList = []
-
 ## Uses pre-determined list of location codes and adds specific data to a list containing location and it's relevant data
 def getLocationData():
     for location in locationCodes:
@@ -20,7 +19,7 @@ def getLocationData():
         locationName = soup.find(class_='CurrentConditions--location--1YWj_').text
         highLowList.append((locationName,dataElements[0].text))
 
-
+# Prints location data to logs
 def printLocationData():
     for location, temps in highLowList:
         print(f'{location}: {temps}')
@@ -42,11 +41,23 @@ def exportToSupabase():
           }
           response = supabase.table('weather_data_high_low').insert(data).execute()
 
-# When using in GCP, two arguements will need to be included in the main function
+for location in locationCodes:
+    data = {
+        'location_name': location
+    }
+    response = supabase.table('locations').insert(data).execute()
+
+# Gets the current date(M/D/YR) which will be added to the date table
+def getDate():
+    today = date.today().strftime("%m/%d/%y")
+    return today
+
+# When using in GCP, two arguements will need to be included in the main function (ie. main(data, context))
 def main():
     highLowList = []
-    getLocationData()
-    printLocationData()
+    #getLocationData()
+    #printLocationData()
     #exportToSupabase()
+    print(getDate())
 
 main()
