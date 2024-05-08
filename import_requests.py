@@ -47,30 +47,44 @@ def getDate():
     today = date.today().strftime("%m/%d/%y")
     return today
 
+#Retrieves the ID of our date
+def getDateID(date):
+    query = supabase.table('dates').select('id').filter('date', 'eq', date).limit(1).execute()
+    return(query)
+
 # # Accesses data within highLow list and splits the high and low temperatures. Imports this data into supabase
-def exportToSupabase():
+def exportToSupabase(locationIDs):
     currentDate = getDate()
     for location, temps in highLowList:
+          locationID = locationIDs[location]
+          dateID = getDateID(currentDate)['data'][0]['id']
           highLow = temps.split('/')
-          high = highLow[0]+'°'
+          high = highLow[0]
+          high = int(high[:-1])
           low = highLow[1]
+          low = int(low[:-1])
+          print(locationID, dateID, high, low)
           data = {
-               'location': location,
-               'high': high,
-               'low': low
+               'location_id': locationID,
+               'date_id': dateID,
+               'high_temp': high,
+               'low_temp': low
           }
-          response = supabase.table('weather_data_high_low').insert(data).execute()
+          response = supabase.table('highlowdata').insert(data).execute()
 
 
 # When using in GCP, two arguements will need to be included in the main function (ie. main(data, context))
 def main():
-    print(checkDate('dates', 'date', getDate()))
+    currentDate = getDate()
+    if not checkDate('dates', 'date', currentDate):
+        response = supabase.table('dates').insert(currentDate).execute()
     highLowList = []
     locationCodes = {}
+    locationIDs = {}
     attributes = getLocationAttributes()['data']
     for location in attributes:
         locationCodes[location['location_name']] = location['location_code']
+        locationIDs[location['location_name']] = location['id']
     getLocationData(locationCodes)
-    printLocationData()
-    # exportToSupabase()
+    exportToSupabase(locationIDs)
 main()
