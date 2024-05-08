@@ -1,5 +1,5 @@
 ## This is a html webscraper that takes data from weather.com and exports the highs and lows of locations to a database (Supabase)
-## 
+## Meant to be run at 12 noon everday on Google Cloud Platform
 
 import requests
 from bs4 import BeautifulSoup
@@ -8,7 +8,11 @@ from datetime import date
 # # WeatherDetailsListItem--label--2ZacS This is labels for general data
 # # WeatherDetailsListItem--wxData--kK35q This is general data for day
 
-# Dictionary with the keys corresponding to their location codes
+
+url = 'https://rwuiwmxmiopyovvrgpkm.supabase.co'
+key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3dWl3bXhtaW9weW92dnJncGttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI4NjY1MDQsImV4cCI6MjAyODQ0MjUwNH0.LJ46wnMzEGJMWB46VvSPuGE7It5CCApXTB6dbiCyFI0'
+supabase: Client = create_client(url, key)
+
 highLowList = []
 
 ## Uses pre-determined list of location codes and adds specific data to a list containing location and it's relevant data
@@ -37,10 +41,6 @@ def getLocationAttributes():
 def printLocationData():
     for location, temps in highLowList:
         print(f'{location}: {temps}')
-
-url = 'https://rwuiwmxmiopyovvrgpkm.supabase.co'
-key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3dWl3bXhtaW9weW92dnJncGttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI4NjY1MDQsImV4cCI6MjAyODQ0MjUwNH0.LJ46wnMzEGJMWB46VvSPuGE7It5CCApXTB6dbiCyFI0'
-supabase: Client = create_client(url, key)
 
 
 #Checks if current date is in our date table
@@ -82,20 +82,20 @@ def exportToSupabase(locationIDs, currentDate):
             'high_temp': high,
             'low_temp': low
             }
-        # try:
-        #     response = supabase.table('highlowdata').insert(data).execute()
-        # except Exception as e:
-        #     print(f'Error while exporting to Supabase: {e}')
+        try:
+            response = supabase.table('highlowdata').insert(data).execute()
+        except Exception as e:
+            print(f'Error while exporting to Supabase: {e}')
         
 
 
 # When using in GCP, two arguements will need to be included in the main function (ie. main(data, context))
 def main():
     currentDate = getDate()
-    # if not checkDate('dates', 'date', currentDate):
-    #     response = supabase.table('dates').insert(currentDate).execute()
-    # else:
-    #     return
+    if not checkDate('dates', 'date', currentDate):
+        response = supabase.table('dates').insert(currentDate).execute()
+    else:
+        return # Prevents duplicate exporting of the same location, same day
     highLowList = []
     locationCodes = {}
     locationIDs = {}
