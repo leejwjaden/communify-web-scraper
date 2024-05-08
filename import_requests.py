@@ -32,6 +32,16 @@ url = 'https://rwuiwmxmiopyovvrgpkm.supabase.co'
 key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3dWl3bXhtaW9weW92dnJncGttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI4NjY1MDQsImV4cCI6MjAyODQ0MjUwNH0.LJ46wnMzEGJMWB46VvSPuGE7It5CCApXTB6dbiCyFI0'
 supabase: Client = create_client(url, key)
 
+def exportDate():
+    currentDate = getDate() 
+
+#Checks if current date is in our date table
+def checkDate(table, column, date):
+    query = supabase.table(table).select('id').filter(column, 'eq', date).limit(1).execute()
+    return len(query) > 0
+
+
+
 # Gets the current date(M/D/YR) which will be added to the date table
 def getDate():
     today = date.today().strftime("%m/%d/%y")
@@ -39,7 +49,8 @@ def getDate():
 
 # # Accesses data within highLow list and splits the high and low temperatures. Imports this data into supabase
 def exportToSupabase():
-     for location, temps in highLowList:
+    currentDate = getDate()
+    for location, temps in highLowList:
           highLow = temps.split('/')
           high = highLow[0]+'°'
           low = highLow[1]
@@ -53,6 +64,7 @@ def exportToSupabase():
 
 # When using in GCP, two arguements will need to be included in the main function (ie. main(data, context))
 def main():
+    print(checkDate('dates', 'date', getDate()))
     highLowList = []
     locationCodes = {}
     attributes = getLocationAttributes()['data']
@@ -61,5 +73,4 @@ def main():
     getLocationData(locationCodes)
     printLocationData()
     # exportToSupabase()
-
 main()
