@@ -47,7 +47,7 @@ def printLocationData():
 def checkDate(table, column, date):
     try:
         query = supabase.table(table).select('id').filter(column, 'eq', date).limit(1).execute()
-        return len(query) > 0
+        return len(query['data']) > 0
     except Exception as e:
         print(f'Error getting date: {e}')
 
@@ -93,9 +93,13 @@ def exportToSupabase(locationIDs, currentDate):
 def main():
     currentDate = getDate()
     if not checkDate('dates', 'date', currentDate):
-        response = supabase.table('dates').insert(currentDate).execute()
+        data = {
+            'date': currentDate
+            }
+        response = supabase.table('dates').insert(data).execute()
     else:
         return # Prevents duplicate exporting of the same location, same day
+    print('proceeding')
     highLowList = []
     locationCodes = {}
     locationIDs = {}
@@ -106,6 +110,5 @@ def main():
     getLocationData(locationCodes)
     printLocationData()
     exportToSupabase(locationIDs, currentDate)
-
 
 main()
