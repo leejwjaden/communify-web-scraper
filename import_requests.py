@@ -9,8 +9,8 @@ from datetime import date
 # # WeatherDetailsListItem--wxData--kK35q This is general data for day
 
 
-url = 'https://rwuiwmxmiopyovvrgpkm.supabase.co'
-key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3dWl3bXhtaW9weW92dnJncGttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI4NjY1MDQsImV4cCI6MjAyODQ0MjUwNH0.LJ46wnMzEGJMWB46VvSPuGE7It5CCApXTB6dbiCyFI0'
+url = ## Add your supabase table URL
+key = ## Add your supabase table key
 supabase: Client = create_client(url, key)
 
 highLowList = []
